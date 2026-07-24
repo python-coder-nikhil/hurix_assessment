@@ -74,8 +74,9 @@ COPY distribution-gateway/ /app/distribution-gateway/
 COPY fixtures/build_manifest.csv /app/fixtures/build_manifest.csv
 COPY reports/publications.expected.txt /app/reports/publications.expected.txt
 
-# Publisher source code.
-COPY publisher/ /app/publisher/
+# Solution files (copied at runtime by solution/publish.sh)
+# environment/publisher/ remains empty for empty-run proof (Proof A)
+COPY solution/ /app/solution/
 
 # The verifier launches the gateway in the background and drives it over
 # localhost; there is no CMD that starts it. A default interactive shell suffices.

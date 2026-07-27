@@ -154,13 +154,22 @@ function initializeDatabase(db) {
 }
 
 // Load the CSV manifest into the database so we can query it.
+// Guard against double-loading on re-runs: only import if the table is empty.
 function loadManifest(db) {
   return new Promise((resolve, reject) => {
-    db.run(`
-      COPY manifest FROM '${MANIFEST_PATH}' (HEADER, DELIMITER ',')
-    `, (err) => {
-      if (err) reject(err);
-      else resolve();
+    db.all('SELECT COUNT(*) AS cnt FROM manifest', (err, rows) => {
+      if (err) return reject(err);
+      const count = Number(rows[0].cnt);
+      if (count > 0) {
+        // Already loaded from a previous run — skip to avoid duplicate rows.
+        return resolve();
+      }
+      db.run(`
+        COPY manifest FROM '${MANIFEST_PATH}' (HEADER, DELIMITER ',')
+      `, (err2) => {
+        if (err2) reject(err2);
+        else resolve();
+      });
     });
   });
 }
